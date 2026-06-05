@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Nur Phone POS</title>
+
+<style>
+body {font-family: Arial; background:#f4f4f4; padding:20px;}
+.box {background:white; padding:15px; max-width:700px; margin:auto; border-radius:10px;}
+input, button {padding:10px; margin:5px; width:95%;}
+button {background:blue; color:white; border:none; cursor:pointer;}
+table {width:100%; margin-top:15px;}
+th, td {padding:8px; border-bottom:1px solid #ddd;}
+h3 {margin-top:25px;}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Nur Phone POS</h2>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+<!-- PRODUCTS -->
+<h3>Products</h3>
+
+<input id="pname" placeholder="Product name">
+<input id="pprice" placeholder="Price">
+<input id="pstock" placeholder="Stock">
+<button onclick="addProduct()">Add Product</button>
+
+<table>
+<thead>
+<tr><th>Name</th><th>Price</th><th>Stock</th></tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+
+<!-- CREDIT -->
+<h3>Credit (Qist)</h3>
+
+<input id="cname" placeholder="Customer name">
+<input id="ctotal" placeholder="Total price">
+<input id="cpaid" placeholder="Paid amount">
+<button onclick="addCredit()">Save Credit</button>
+
+<table>
+<thead>
+<tr><th>Name</th><th>Total</th><th>Paid</th><th>Remain</th></tr>
+</thead>
+<tbody id="creditList"></tbody>
+</table>
+
+<!-- PRINT -->
+<button onclick="window.print()">🖨 Print Page</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* USERS */
+let users = [
+  {username:"admin", password:"1234"}
+];
+
+/* DATA */
+let products = JSON.parse(localStorage.getItem("products") || "[]");
+let credits = JSON.parse(localStorage.getItem("credits") || "[]");
+
+/* DB FUNCTIONS */
+function save(){
+  localStorage.setItem("products", JSON.stringify(products));
+  localStorage.setItem("credits", JSON.stringify(credits));
+}
+
+/* LOGIN */
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  let ok = users.find(x => x.username==u && x.password==p);
+
+  if(ok){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("app").style.display="block";
+    load();
+    loadCredits();
+  } else {
+    alert("Wrong login");
+  }
+}
+
+/* PRODUCTS */
+function addProduct(){
+  let name = document.getElementById("pname").value;
+  let price = document.getElementById("pprice").value;
+  let stock = document.getElementById("pstock").value;
+
+  products.push({name, price, stock});
+  save();
+  load();
+}
+
+function load(){
+  let list = document.getElementById("list");
+  list.innerHTML = "";
+
+  products.forEach(p=>{
+    list.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td>${p.stock}</td>
+      </tr>
+    `;
+  });
+}
+
+/* CREDIT */
+function addCredit(){
+  let name = document.getElementById("cname").value;
+  let total = Number(document.getElementById("ctotal").value);
+  let paid = Number(document.getElementById("cpaid").value);
+
+  let remain = total - paid;
+
+  credits.push({name, total, paid, remain});
+  save();
+  loadCredits();
+}
+
+function loadCredits(){
+  let list = document.getElementById("creditList");
+  list.innerHTML = "";
+
+  credits.forEach(c=>{
+    list.innerHTML += `
+      <tr>
+        <td>${c.name}</td>
+        <td>${c.total}</td>
+        <td>${c.paid}</td>
+        <td>${c.remain}</td>
+      </tr>
+    `;
+  });
+}
+
+</script>
+
+</body>
+</html>
